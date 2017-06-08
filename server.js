@@ -122,7 +122,7 @@ function httpsGet(url, callback) {
   });
 };
 
-const timeout = 1000 * 5;
+const timeout = 1000 * 5 * 60;
 const DateOut = '2017-07-20'
 const FlexDaysOut = 2
 const ryanairURL = `https://desktopapps.ryanair.com/v3/en-gb/availability?ADT=2&CHD=1&DateOut=${DateOut}&Destination=BUD&FlexDaysOut=${FlexDaysOut}&INF=1&Origin=SXF&RoundTrip=false&TEEN=0&exists=false`;
@@ -170,7 +170,6 @@ function scanForPrice(prev) {
         serverTimeUTC: data.serverTimeUTC
       }
     }
-    console.log(JSON.stringify(ryanairPrices))
     setTimeout(() => {scanForPrice(data)}, timeout);
   }));
 };
