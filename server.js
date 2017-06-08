@@ -169,11 +169,11 @@ function scanForPrice(prev) {
 scanForPrice();
 
 app.get('/api/ryanair/pricelist', function (req, res) {
-  priceList && res.json(priceList);
+  ryanairPrices && res.json(ryanairPrices);
 });
 
 app.get('/ryanair/pricelist', function (req, res) {
-  priceList && res.send(JSON.stringify(priceList, null, 2));
+  ryanairPrices && res.send(JSON.stringify(ryanairPrices, null, 2));
 });
 
 
