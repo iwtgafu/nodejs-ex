@@ -161,7 +161,7 @@ function scanForPrice(prev) {
       }
     }
 
-    console.log(JSON.stringify(ryanairPrices));
+    // console.log(JSON.stringify(ryanairPrices, null, 2));
     setTimeout(() => {scanForPrice(data)}, timeout);
   }));
 };
@@ -170,6 +170,10 @@ scanForPrice();
 
 app.get('/api/ryanair/pricelist', function (req, res) {
   priceList && res.json(priceList);
+});
+
+app.get('/ryanair/pricelist', function (req, res) {
+  priceList && res.send(JSON.stringify(priceList, null, 2));
 });
 
 
