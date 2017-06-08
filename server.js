@@ -4,6 +4,10 @@ var express = require('express'),
     app     = express(),
     eps     = require('ejs'),
     morgan  = require('morgan');
+
+var _ = require('lodash');
+var https = require('https');
+
     
 Object.assign=require('object-assign')
 
@@ -101,7 +105,86 @@ initDb(function(err){
   console.log('Error connecting to Mongo. Message:\n'+err);
 });
 
+
+
+function httpsGet(url, callback) {
+
+  return https.get(url, function (response) {
+    // Continuously update stream with data
+    var body = '';
+    response.on('data', function (d) {
+      body += d;
+    });
+    response.on('end', function () {
+      // Data reception is done, do whatever with it!
+      callback(JSON.parse(body));
+    });
+  });
+};
+
+const timeout = 1000 * 5;
+const DateOut = '2017-07-20'
+const FlexDaysOut = 2
+const ryanairURL = `https://desktopapps.ryanair.com/v3/en-gb/availability?ADT=2&CHD=1&DateOut=${DateOut}&Destination=BUD&FlexDaysOut=${FlexDaysOut}&INF=1&Origin=SXF&RoundTrip=false&TEEN=0&exists=false`;
+
+function transformResponse(onTransformed) {
+  return function(resp) {
+    onTransformed && onTransformed({
+      serverTimeUTC: resp.serverTimeUTC,
+      priceList: resp.trips[0].dates.map(date => {
+        const price = +date.flights[0].regularFare.fares[0].amount;
+
+        return {
+          dateOut: date.dateOut,
+          prices: [{
+            price,
+            serverTimeUTC: resp.serverTimeUTC,
+          }],
+        }
+      }),
+    });
+  }
+}
+
+var ryanairPrices;
+function scanForPrice(prev) {
+  httpsGet(ryanairURL, transformResponse((data) => {
+    if (!prev) {
+      ryanairPrices = data;
+    } else {
+      const priceList = ryanairPrices.priceList.map(item => {
+
+        const nextPrices = data.priceList.find(np => np.dateOut === item.dateOut).prices;
+        const nextPrice = _.get(_.last(nextPrices), 'price');
+        const price = _.get(_.last(item.prices), 'price');
+
+        if (price === nextPrice) {
+          return item
+        } else {
+          return Object.assign({}, item, {prices: item.prices.concat(nextPrices)});
+        };
+      });
+
+      ryanairPrices = {
+        priceList,
+        serverTimeUTC: data.serverTimeUTC
+      }
+    }
+    console.log(JSON.stringify(ryanairPrices))
+    setTimeout(() => {scanForPrice(data)}, timeout);
+  }));
+};
+
+scanForPrice();
+
+app.get('/api/ryanair/pricelist', function (req, res) {
+  priceList && res.json(priceList);
+});
+
 app.listen(port, ip);
 console.log('Server running on http://%s:%s', ip, port);
+
+
+
 
 module.exports = app ;
