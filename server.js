@@ -119,16 +119,19 @@ const ryanairURL = `https://desktopapps.ryanair.com/v3/en-gb/availability?ADT=2&
 
 function transformResponse(onTransformed) {
   return function(resp) {
+    // console.log(JSON.stringify(resp));
     onTransformed && onTransformed({
       serverTimeUTC: resp.serverTimeUTC,
       priceList: resp.trips[0].dates.map(date => {
         const price = +date.flights[0].regularFare.fares[0].amount;
+        const faresLeft = date.flights[0].faresLeft;
 
         return {
           dateOut: date.dateOut,
           prices: [{
             price,
             serverTimeUTC: resp.serverTimeUTC,
+            faresLeft,
           }],
         }
       }),
@@ -148,7 +151,10 @@ function scanForPrice(prev) {
         const nextPrice = _.get(_.last(nextPrices), 'price');
         const price = _.get(_.last(item.prices), 'price');
 
-        if (price === nextPrice) {
+        const nextFaresLeft = _.get(_.last(nextPrices), 'faresLeft');
+        const faresLeft = _.get(_.last(item.prices), 'faresLeft');
+
+        if (price === nextPrice && nextFaresLeft === faresLeft) {
           return item
         } else {
           return Object.assign({}, item, {prices: item.prices.concat(nextPrices)});
