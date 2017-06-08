@@ -173,7 +173,7 @@ app.get('/api/ryanair/pricelist', function (req, res) {
 });
 
 app.get('/ryanair/pricelist', function (req, res) {
-  ryanairPrices && res.send(JSON.stringify(ryanairPrices, null, 2));
+  ryanairPrices && res.send(JSON.stringify(ryanairPrices));
 });
 
 
