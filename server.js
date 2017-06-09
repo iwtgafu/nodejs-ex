@@ -112,6 +112,7 @@ function httpsGet(url, callback) {
   });
 };
 
+
 function addDays(date, days) {
     var d = new Date(date);
     d.setDate(d.getDate() + days);
@@ -160,16 +161,18 @@ function scanForPrice(date, flexDays, prevPriceList) {
   httpsGet(url, transformResponse((resp) => {
     const nextPriceList = mergePriceList(prevPriceList, resp);
     if (flexDays > 6) {
-      const d = addDays(date, iteration);
+      const d = addDays(date, iteration + 1);
       scanForPrice(d, flexDays - 6, nextPriceList);
     } else {
       ryanairPrices = ryanairPrices ? updatePriceLists(ryanairPrices, nextPriceList) : nextPriceList;
       const timeout = 1000 * 5 * 60;
-      setTimeout(() => {scanForPrice('2017-06-10', 40)}, timeout);
+      setTimeout(() => {scanForPriceFn}, timeout);
     }
   }));
 };
-scanForPrice('2017-06-10', 40)
+
+const scanForPriceFn = scanForPrice.bind(null, '2017-06-22', 40)
+scanForPriceFn();
 
 
 function updatePriceLists(prev, next) {
