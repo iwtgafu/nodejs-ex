@@ -166,7 +166,7 @@ function scanForPrice(date, flexDays, prevPriceList) {
     } else {
       ryanairPrices = ryanairPrices ? updatePriceLists(ryanairPrices, nextPriceList) : nextPriceList;
       const timeout = 1000 * 5 * 60;
-      setTimeout(() => {scanForPriceFn}, timeout);
+      setTimeout(() => {scanForPriceFn()}, timeout);
     }
   }));
 };
