@@ -171,6 +171,10 @@ function scanForPrice(date, flexDays, prevPriceList) {
   }));
 };
 
+
+const begin = '2017-06-12';
+const today = new Date();
+const scanFrom = new Date(begin) > today ? begin : `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`
 const scanForPriceFn = scanForPrice.bind(null, '2017-06-22', 40)
 scanForPriceFn();
 
