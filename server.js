@@ -5,7 +5,7 @@ var express = require('express'),
     eps     = require('ejs'),
     morgan  = require('morgan');
 
-var getRyanairPriceList = require('./ryanair')
+require('./ryanair')
 
 Object.assign=require('object-assign')
 
@@ -94,9 +94,10 @@ app.get('/pagecount', function (req, res) {
 });
 
 
+const root = process.env.OPENSHIFT_APP_NAME ? '/data' : __dirname;
 
 app.get('/api/ryanair/pricelist', function (req, res) {
-  res.json(getRyanairPriceList());
+  res.sendFile(root + '/ryanair.json');
 });
 
 // error handling

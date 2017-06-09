@@ -1,7 +1,8 @@
 var _ = require('lodash');
 var https = require('https');
+var fs = require('fs');
 
-
+const fileName = process.env.OPENSHIFT_APP_NAME ? '/data/ryanair.json' : './ryanair.json';
 
 function httpsGet(url, callback) {
 
@@ -70,9 +71,15 @@ function scanForPrice(date, flexDays, prevPriceList) {
       const d = addDays(date, iteration + 1);
       scanForPrice(d, flexDays - 6, nextPriceList);
     } else {
-      ryanairPrices = ryanairPrices ? updatePriceLists(ryanairPrices, nextPriceList) : nextPriceList;
-      const timeout = 1000 * 5 * 60;
-      setTimeout(() => {scanForPriceFn()}, timeout);
+      fs.readFile(fileName, 'utf8', (err, data) => {
+        const ryanairPrices = !err ? updatePriceLists(JSON.parse(data), nextPriceList) : nextPriceList;
+
+        fs.writeFile(fileName, JSON.stringify(ryanairPrices), 'utf8', (err, data) => {
+          if (err) console.log(err);
+          const timeout = 1000 * 5 * 60;
+          setTimeout(() => {scanForPriceFn()}, timeout);          
+        });
+      });
     }
   }));
 };
@@ -100,10 +107,14 @@ function updatePriceLists(prev, next) {
   }
 }
 
+function readPriceListFile() {
+  fs.readFile('./ryanair.json', 'utf8', (err, data) => {
+    if (err) throw err;
+    console.log(data);
+  });
+}
 
-var ryanairPrices;
 const today = new Date();
 const scanFrom = addDays(today, 1)
 const scanForPriceFn = scanForPrice.bind(null, scanFrom, 45)
 scanForPriceFn();
-module.exports = () => ryanairPrices;
