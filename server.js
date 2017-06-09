@@ -126,11 +126,11 @@ function getUrl(dateout, flexDays) {
 
 function transformResponse(onTransformed) {
   return function(resp) {
-    // console.log(JSON.stringify(resp));
+    console.log(JSON.stringify(resp));
     onTransformed && onTransformed({
       serverTimeUTC: resp.serverTimeUTC,
       priceList: resp.trips[0].dates.map(date => {
-        const price = + _.get(date, 'flights[0].regularFare.fares[0].amount');
+        const price = _.get(date, 'flights[0].regularFare.fares[0].amount', 0);
         const faresLeft = _.get(date, 'flights[0].faresLeft');
 
         return {
@@ -174,7 +174,7 @@ function scanForPrice(date, flexDays, prevPriceList) {
 
 
 const today = new Date();
-const scanFrom = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`
+const scanFrom = addDays(today, 1)
 const scanForPriceFn = scanForPrice.bind(null, scanFrom, 45)
 scanForPriceFn();
 
