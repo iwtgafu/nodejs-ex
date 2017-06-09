@@ -130,8 +130,8 @@ function transformResponse(onTransformed) {
     onTransformed && onTransformed({
       serverTimeUTC: resp.serverTimeUTC,
       priceList: resp.trips[0].dates.map(date => {
-        const price = +date.flights[0].regularFare.fares[0].amount;
-        const faresLeft = date.flights[0].faresLeft;
+        const price = + _.get(date, 'flights[0].regularFare.fares[0].amount');
+        const faresLeft = _.get(date, 'flights[0].faresLeft');
 
         return {
           dateOut: date.dateOut,
@@ -172,10 +172,10 @@ function scanForPrice(date, flexDays, prevPriceList) {
 };
 
 
-const begin = '2017-06-12';
+
 const today = new Date();
-const scanFrom = new Date(begin) > today ? begin : `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`
-const scanForPriceFn = scanForPrice.bind(null, '2017-06-22', 40)
+const scanFrom = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`
+const scanForPriceFn = scanForPrice.bind(null, scanFrom, 45)
 scanForPriceFn();
 
 
