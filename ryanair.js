@@ -3,6 +3,8 @@ var https = require('https');
 var fs = require('fs');
 var getConnection = require('./db');
 
+const fileName = './ryanair.json';
+
 function httpsGet(url, callback) {
 
   return https.get(url, function (response) {
@@ -30,25 +32,23 @@ function getUrl(dateout, flexDays) {
 }
 
 
-function transformResponse(onTransformed) {
-  return function (resp) {
+function transformResponse(resp) {
     // console.log(JSON.stringify(resp));
-    onTransformed && onTransformed({
-      serverTimeUTC: resp.serverTimeUTC,
-      priceList: _.map(_.get(resp, 'trips[0].dates'), date => {
-        const price = _.get(date, 'flights[0].regularFare.fares[0].amount', 0);
-        const faresLeft = _.get(date, 'flights[0].faresLeft');
+  return {
+    serverTimeUTC: resp.serverTimeUTC,
+    priceList: _.map(_.get(resp, 'trips[0].dates'), date => {
+      const price = _.get(date, 'flights[0].regularFare.fares[0].amount', 0);
+      const faresLeft = _.get(date, 'flights[0].faresLeft');
 
-        return {
-          dateOut: date.dateOut,
-          prices: [{
-            price,
-            serverTimeUTC: resp.serverTimeUTC,
-            faresLeft,
-          }],
-        }
-      }),
-    });
+      return {
+        dateOut: date.dateOut,
+        prices: [{
+          price,
+          serverTimeUTC: resp.serverTimeUTC,
+          faresLeft,
+        }],
+      }
+    })
   }
 }
 
@@ -64,25 +64,24 @@ function mergePriceList(prev, next) {
 function scanForPrice(date, flexDays, prevPriceList) {
   const iteration = flexDays > 6 ? 6 : flexDays
   const url = getUrl(date, iteration);
-  httpsGet(url, (resp) => {
-    savePriceList(resp);
-    transformResponse((resp) => {
-      const nextPriceList = mergePriceList(prevPriceList, resp);
-      if (flexDays > 6) {
-        const d = addDays(date, iteration + 1);
-        scanForPrice(d, flexDays - 6, nextPriceList);
-      } else {
-        fs.readFile(fileName, 'utf8', (err, data) => {
-          const ryanairPrices = !err ? updatePriceLists(JSON.parse(data), nextPriceList) : nextPriceList;
+  httpsGet(url, (data) => {
+    savePriceList(data);
+    const resp = transformResponse(data);
+    const nextPriceList = mergePriceList(prevPriceList, resp);
+    if (flexDays > 6) {
+      const d = addDays(date, iteration + 1);
+      scanForPrice(d, flexDays - 6, nextPriceList);
+    } else {
+      fs.readFile(fileName, 'utf8', (err, data) => {
+        const ryanairPrices = !err ? updatePriceLists(JSON.parse(data), nextPriceList) : nextPriceList;
 
-          fs.writeFile(fileName, JSON.stringify(ryanairPrices), 'utf8', (err, data) => {
-            if (err) console.log(err);
-            const timeout = 1000 * 5 * 60;
-            setTimeout(() => { scanForPriceFn() }, timeout);
-          });
+        fs.writeFile(fileName, JSON.stringify(ryanairPrices), 'utf8', (err, data) => {
+          if (err) console.log(err);
+          const timeout = 1000 * 5 * 60;
+          setTimeout(() => { scanForPriceFn() }, timeout);
         });
-      }
-    });
+      });
+    }
   });
 };
 
