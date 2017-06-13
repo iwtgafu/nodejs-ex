@@ -3,8 +3,6 @@ var https = require('https');
 var fs = require('fs');
 var getConnection = require('./db');
 
-const fileName = process.env.OPENSHIFT_APP_NAME ? '/data/ryanair.json' : './ryanair.json';
-
 function httpsGet(url, callback) {
 
   return https.get(url, function (response) {
@@ -109,13 +107,6 @@ function updatePriceLists(prev, next) {
     priceList,
     serverTimeUTC: next.serverTimeUTC
   }
-}
-
-function readPriceListFile() {
-  fs.readFile('./ryanair.json', 'utf8', (err, data) => {
-    if (err) throw err;
-    console.log(data);
-  });
 }
 
 const today = new Date();
