@@ -34,7 +34,7 @@ function getUrl(dateout, flexDays) {
 
 function transformResponse(onTransformed) {
   return function (resp) {
-    console.log(JSON.stringify(resp));
+    // console.log(JSON.stringify(resp));
     onTransformed && onTransformed({
       serverTimeUTC: resp.serverTimeUTC,
       priceList: _.map(_.get(resp, 'trips[0].dates'), date => {
