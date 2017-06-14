@@ -38,7 +38,8 @@ var getConnection = function(callback) {
 
   mongodb.connect(mongoURL, function(err, conn) {
     if (err) {
-      callback && callback(err);
+      console.log('connect error: ', err);
+      callback && callback(err);      
       return;
     }
     db = conn;

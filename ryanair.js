@@ -125,8 +125,6 @@ function savePriceList(resp) {
     if (!err) {
       var priceLists = db.collection('ryanairPriceLists');
       priceLists.insert(resp);
-    } else {
-      console.log(err)
     }
   });
 }
@@ -148,10 +146,26 @@ function getPrices(callback) {
             console.log(err)
           }
       });
-    } else {
-      console.log(err)
     }
   });
 }
 
-module.exports = getPrices;
+function getPriceLists(callback) {
+  getConnection((err, db) => {
+    getPrices((err, priceLists) => {
+      db.collection('ryanairPriceLists').find().sort({serverTimeUTC: -1}).limit(1).toArray(function(err, lastPriceList) {
+        if (!err) {
+          const response = {
+            priceLists: priceLists,
+            serverTimeUTC: lastPriceList && lastPriceList.length > 0 && lastPriceList[0].serverTimeUTC,
+          }
+          callback(err, response);
+        } else {
+          console.log(err)
+        } 
+      })
+    })
+  })
+}
+
+module.exports = getPriceLists;
