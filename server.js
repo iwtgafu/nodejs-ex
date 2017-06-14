@@ -97,13 +97,8 @@ app.get('/pagecount', function (req, res) {
 const root = process.env.OPENSHIFT_APP_NAME ? '/data' : __dirname;
 
 app.get('/api/ryanair/pricelist', function (req, res) {
-  res.sendFile(root + '/ryanair.json');
-});
-
-app.get('/api/ryanair/pricelist1', function (req, res) {
   getPrices(function(err, docs) {
     res.send(docs)
-    // console.log(err, collection, stats)
   })
 });
 

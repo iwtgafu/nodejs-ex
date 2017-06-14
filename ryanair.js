@@ -72,41 +72,9 @@ function scanForPrice(date, flexDays, prevPriceList) {
       const d = addDays(date, iteration + 1);
       scanForPrice(d, flexDays - 6, nextPriceList);
     } else {
-      fs.readFile(fileName, 'utf8', (err, data) => {
-        const ryanairPrices = !err ? updatePriceLists(JSON.parse(data), nextPriceList) : nextPriceList;
-
-        fs.writeFile(fileName, JSON.stringify(ryanairPrices), 'utf8', (err, data) => {
-          if (err) console.log(err);
-          const timeout = 1000 * 5 * 60;
-          setTimeout(() => { scanForPriceFn() }, timeout);
-        });
-      });
     }
   });
 };
-
-function updatePriceLists(prev, next) {
-  const priceList = prev.priceList.map(item => {
-
-    const nextPrices = _.get(_.find(next.priceList, np => np.dateOut === item.dateOut), 'prices');
-    const nextPrice = _.get(_.last(nextPrices), 'price');
-    const price = _.get(_.last(item.prices), 'price');
-
-    const nextFaresLeft = _.get(_.last(nextPrices), 'faresLeft');
-    const faresLeft = _.get(_.last(item.prices), 'faresLeft');
-
-    if (price === nextPrice && nextFaresLeft === faresLeft) {
-      return item
-    } else {
-      return Object.assign({}, item, { prices: item.prices.concat(nextPrices) });
-    };
-  });
-
-  return {
-    priceList,
-    serverTimeUTC: next.serverTimeUTC
-  }
-}
 
 const today = new Date();
 const scanFrom = addDays(today, 1)
@@ -120,16 +88,22 @@ function mapper () {
 
     dates.forEach(function(date) {
         const flight = date && date.flights && date.flights.length > 0 && date.flights[0];
+        const faresLeft = flight && flight.faresLeft;
         const fare = flight && flight.regularFare && flight.regularFare.fares && flight.regularFare.fares.length > 0 && flight.regularFare.fares[0];
         const amount = fare && fare.amount
-        emit(date.dateOut, {prices: [{amount: amount, serverTimeUTC: serverTimeUTC}]})
+
+        if (amount) {
+          emit(date.dateOut, {prices: [{faresLeft: faresLeft, amount: amount, serverTimeUTC: serverTimeUTC}]})
+        }
     });
 };
 
 function reducer(key, values) {
   var result = values.reduce(function (result, value) {
-    const lastAmount = value.prices[value.prices.length - 1].amount
-    if (result.length === 0 || result[result.length - 1].amount !== lastAmount) {
+    const nextPriceList = result[result.length - 1];
+    const lastPriceList = value.prices[value.prices.length - 1]
+    
+    if (result.length === 0 || nextPriceList.amount !== lastPriceList.amount || nextPriceList.faresLeft !== lastPriceList.faresLeft) {
       return result.concat(value.prices)
     }
     return result;
@@ -149,6 +123,8 @@ function savePriceList(resp) {
     if (!err) {
       var priceLists = db.collection('ryanairPriceLists');
       priceLists.insert(resp);
+    } else {
+      console.log(err)
     }
   });
 }
@@ -162,10 +138,16 @@ function getPrices(callback) {
             collection.find().toArray(function(err, docs) {
               if (!err) {
                 callback(err, docs);
+              } else {
+                console.log(err)
               }
             });
+          } else {
+            console.log(err)
           }
       });
+    } else {
+      console.log(err)
     }
   });
 }
