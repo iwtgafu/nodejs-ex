@@ -26,10 +26,13 @@ var db = null
 
 var getConnection = function(callback) {
   if (db) {
-    callback && callback(null, db);
+    callback && callback(undefined, db);
     return;
   }
-  if (mongoURL == null) return;
+  if (mongoURL == null) {
+    console.log('mongoURL is not specified');
+    return;
+  }
   var mongodb = require('mongodb');
   if (mongodb == null) return;
 
@@ -40,7 +43,7 @@ var getConnection = function(callback) {
     }
     db = conn;
     console.log('Connected to MongoDB at: %s', mongoURL);
-    callback && callback(null, conn);
+    callback && callback(undefined, conn);
   });
 };
 

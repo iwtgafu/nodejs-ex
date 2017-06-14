@@ -114,30 +114,33 @@ const scanForPriceFn = scanForPrice.bind(null, scanFrom, 45)
 scanForPriceFn();
 
 
-function mapper() {
-  var dates = this.trips[0].dates
-  dates.forEach(function (date) {
-    var amount = date.flights[0].regularFare.fares[0].amount
-    emit(date.dateOut, { amount: amount, serverTimeUTC: this.serverTimeUTC })
-  });
+function mapper () { 
+    const dates = this.trips[0].dates
+    const serverTimeUTC = this.serverTimeUTC
+
+    dates.forEach(function(date) {
+        const flight = date && date.flights && date.flights.length > 0 && date.flights[0];
+        const fare = flight && flight.regularFare && flight.regularFare.fares && flight.regularFare.fares.length > 0 && flight.regularFare.fares[0];
+        const amount = fare && fare.amount
+        emit(date.dateOut, {prices: [{amount: amount, serverTimeUTC: serverTimeUTC}]})
+    });
 };
 
 function reducer(key, values) {
   var result = values.reduce(function (result, value) {
-    if (result.length === 0 || result[result.length - 1].amount !== value.amount) {
-      result.push(value)
+    const lastAmount = value.prices[value.prices.length - 1].amount
+    if (result.length === 0 || result[result.length - 1].amount !== lastAmount) {
+      return result.concat(value.prices)
     }
     return result;
   }, []);
 
-  return { prices: result }
+  return {prices: result}
 };
 
 
 var options = {
-  out: {
-    merge: "prices",
-  },
+  out:  "prices",
 };
 
 
@@ -149,3 +152,22 @@ function savePriceList(resp) {
     }
   });
 }
+
+function getPrices(callback) {
+    getConnection((err, db) => {
+    if (!err) {
+      var priceLists = db.collection('ryanairPriceLists');
+      priceLists.mapReduce(mapper, reducer, options, function(err, collection, stats) {
+          if (!err) {
+            collection.find().toArray(function(err, docs) {
+              if (!err) {
+                callback(err, docs);
+              }
+            });
+          }
+      });
+    }
+  });
+}
+
+module.exports = getPrices;
