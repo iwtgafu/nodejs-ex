@@ -72,6 +72,8 @@ function scanForPrice(date, flexDays, prevPriceList) {
       const d = addDays(date, iteration + 1);
       scanForPrice(d, flexDays - 6, nextPriceList);
     } else {
+      const timeout = 1000 * 15 * 60;
+      setTimeout(() => { scanForPriceFn() }, timeout);
     }
   });
 };
