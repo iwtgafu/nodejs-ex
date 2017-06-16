@@ -7,8 +7,8 @@ var express = require('express'),
 
 // var getPrices = require('./ryanair')
 
-require('./ryanair/scanner')
-import getPriceLists from './ryanair/aggregator'
+// require('./ryanair/scanner')
+// import getPriceLists from './ryanair/aggregator'
 
 Object.assign=require('object-assign')
 
@@ -81,12 +81,13 @@ app.get('/', function (req, res) {
   }
 });
 
+/*
 app.get('/api/ryanair/pricelist', function (req, res) {
   getPriceLists(function(docs) {
     res.send(docs)
   })
 });
-
+*/
 app.get('/pagecount', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
