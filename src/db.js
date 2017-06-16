@@ -24,7 +24,7 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
 
 var db = null
 
-var getConnection = function(callback) {
+export default function getConnection(callback) {
   if (db) {
     callback && callback(undefined, db);
     return;
@@ -44,8 +44,6 @@ var getConnection = function(callback) {
     }
     db = conn;
     console.log('Connected to MongoDB at: %s', mongoURL);
-    callback && callback(undefined, conn);
+    callback && callback(undefined, db);
   });
 };
-
-module.exports = getConnection;

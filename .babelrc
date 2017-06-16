@@ -1,0 +1,6 @@
+{
+  "presets": ["es2015"],
+  "plugins": [],
+  "sourceMaps": true,
+  "retainLines": true
+}

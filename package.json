@@ -4,12 +4,10 @@
   "description": "Node.js sample app for OpenShift 3",
   "main": "server.js",
   "dependencies": {
-    "chai": "^3.5.0",
-    "chai-http": "^2.0.1",
+    "assert": "^1.4.1",
     "ejs": "^2.4.1",
     "express": "^4.13.4",
     "lodash": "^4.17.4",
-    "mocha": "^2.4.5",
     "mongodb": "^2.1.16",
     "morgan": "^1.7.0",
     "object-assign": "4.1.0"
@@ -19,8 +17,7 @@
     "npm": "*"
   },
   "scripts": {
-    "start": "node server.js",
-    "test": "IP=0.0.0.0 PORT=3030 mocha --timeout 5000 tests/*_test.js"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -31,5 +28,9 @@
   "bugs": {
     "url": "http://github.com/openshift/nodejs-ex/issues"
   },
-  "homepage": "http://github.com/openshift/nodejs-ex"
+  "homepage": "http://github.com/openshift/nodejs-ex",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babel-register": "^6.24.1"
+  }
 }

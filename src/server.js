@@ -5,7 +5,10 @@ var express = require('express'),
     eps     = require('ejs'),
     morgan  = require('morgan');
 
-var getPrices = require('./ryanair')
+// var getPrices = require('./ryanair')
+
+require('./ryanair/scanner')
+import getPriceLists from './ryanair/aggregator'
 
 Object.assign=require('object-assign')
 
@@ -78,26 +81,8 @@ app.get('/', function (req, res) {
   }
 });
 
-app.get('/pagecount', function (req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
-  if (!db) {
-    initDb(function(err){});
-  }
-  if (db) {
-    db.collection('counts').count(function(err, count ){
-      res.send('{ pageCount: ' + count + '}');
-    });
-  } else {
-    res.send('{ pageCount: -1 }');
-  }
-});
-
-
-const root = process.env.OPENSHIFT_APP_NAME ? '/data' : __dirname;
-
 app.get('/api/ryanair/pricelist', function (req, res) {
-  getPrices(function(err, docs) {
+  getPriceLists(function(docs) {
     res.send(docs)
   })
 });
