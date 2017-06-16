@@ -7,8 +7,8 @@ var express = require('express'),
 
 // var getPrices = require('./ryanair')
 
-// require('./ryanair/scanner')
-// import getPriceLists from './ryanair/aggregator'
+require('./ryanair/scanner')
+import getPriceLists from './ryanair/aggregator'
 
 Object.assign=require('object-assign')
 
