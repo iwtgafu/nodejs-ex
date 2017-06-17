@@ -81,13 +81,13 @@ app.get('/', function (req, res) {
   }
 });
 
-/*
+
 app.get('/api/ryanair/pricelist', function (req, res) {
   getPriceLists(function(docs) {
     res.send(docs)
   })
 });
-*/
+
 app.get('/pagecount', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
