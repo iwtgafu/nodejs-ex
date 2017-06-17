@@ -22,13 +22,8 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
   }
 }
 
-var db = null
 
 export default function getConnection(callback) {
-  if (db) {
-    callback && callback(undefined, db);
-    return;
-  }
   if (mongoURL == null) {
     console.log('mongoURL is not specified');
     return;
@@ -36,14 +31,12 @@ export default function getConnection(callback) {
   var mongodb = require('mongodb');
   if (mongodb == null) return;
 
-  mongodb.connect(mongoURL, function(err, conn) {
+  mongodb.connect(mongoURL, function(err, db) {
     if (err) {
       console.log('connect error: ', err);
       callback && callback(err);      
       return;
     }
-    db = conn;
-    console.log('Connected to MongoDB at: %s', mongoURL);
     callback && callback(undefined, db);
   });
 };

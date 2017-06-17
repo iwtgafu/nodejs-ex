@@ -54,6 +54,7 @@ function aggregate(callback) {
 
 function getLastPriceList(callback) {
   getConnection((err, db) => {
+    console.log('getLastPriceList')
     assert.equal(null, err);    
     db.collection('ryanairPriceLists').find().sort({serverTimeUTC: -1}).limit(1).toArray(function(err, lastPriceList) {
       assert.equal(null, err);    
