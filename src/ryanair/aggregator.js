@@ -3,6 +3,7 @@ import assert from 'assert'
 
 
 function mapper () { 
+    if (!this.trips || this.trips.length < 1) return;
     const dates = this.trips[0].dates
     const serverTimeUTC = this.serverTimeUTC
 
