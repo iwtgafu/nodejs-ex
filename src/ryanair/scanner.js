@@ -1,3 +1,4 @@
+import {get} from 'lodash'
 import assert from 'assert'
 import {addDays, httpsGet} from '../utils'
 import getConnection from '../db'
@@ -37,11 +38,13 @@ function scanPriceList(from, depth) {
 
 
 function savePriceList(resp) {
-  getConnection((err, db) => {
-    assert.equal(null, err);    
-    db.collection('ryanairPriceLists').insert(resp);
-    db.close();
-  });
+  if (get(resp, 'trips.0')) {
+    getConnection((err, db) => {
+      assert.equal(null, err);    
+      db.collection('ryanairPriceLists').insert(resp);
+      db.close();
+    });
+  }
 }
 
 function getUrl(dateout, flexDays) {
@@ -56,6 +59,7 @@ function getUrl(dateout, flexDays) {
       DateOut: dateout,
       FlexDaysOut: flexDays,
       RoundTrip: false,
+      ToUs: 'AGREED',
       exists: false
     },
   });
