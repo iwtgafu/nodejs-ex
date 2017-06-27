@@ -19,16 +19,17 @@ function scanPriceList(from, depth) {
 
     const url = getUrl(date, iteration);
     httpsGet(url, (err, data) => {
-      assert.equal(null, err);
-      console.log('fetched from: ', date, iteration, ' days: ', JSON.stringify(data));
-
-      savePriceList(data);
-
-      if (flexDays > 6) {
-        const d = addDays(date, iteration + 1);
-        scan(d, flexDays - 6);
+      if (err || !get(data, 'trips.0')) {
+        console.log('requested ryanair:', url, 'error:', err, 'response:', data);
       } else {
-        setTimeout(() => { scan(from, depth) }, SLEEL_DURATION);
+        savePriceList(data);
+
+        if (flexDays > 6) {
+          const d = addDays(date, iteration + 1);
+          scan(d, flexDays - 6);
+        } else {
+          setTimeout(() => { scan(from, depth) }, SLEEL_DURATION);
+        }
       }
     });
   };
@@ -38,13 +39,11 @@ function scanPriceList(from, depth) {
 
 
 function savePriceList(resp) {
-  if (get(resp, 'trips.0')) {
-    getConnection((err, db) => {
-      assert.equal(null, err);    
-      db.collection('ryanairPriceLists').insert(resp);
-      db.close();
-    });
-  }
+  getConnection((err, db) => {
+    assert.equal(null, err);
+    db.collection('ryanairPriceLists').insert(resp);
+    db.close();
+  });
 }
 
 function getUrl(dateout, flexDays) {

@@ -3,20 +3,20 @@ import assert from 'assert'
 
 
 function mapper () { 
-    if (!this.trips || this.trips.length < 1) return;
-    const dates = this.trips[0].dates
-    const serverTimeUTC = this.serverTimeUTC
+  if (!this.trips || this.trips.length < 1) return;
+  const dates = this.trips[0].dates
+  const serverTimeUTC = this.serverTimeUTC
 
-    dates.forEach(function(date) {
-        const flight = date && date.flights && date.flights.length > 0 && date.flights[0];
-        const faresLeft = flight && flight.faresLeft;
-        const fare = flight && flight.regularFare && flight.regularFare.fares && flight.regularFare.fares.length > 0 && flight.regularFare.fares[0];
-        const amount = fare && fare.amount
+  dates.forEach(function(date) {
+    const flight = date && date.flights && date.flights.length > 0 && date.flights[0];
+    const faresLeft = flight && flight.faresLeft;
+    const fare = flight && flight.regularFare && flight.regularFare.fares && flight.regularFare.fares.length > 0 && flight.regularFare.fares[0];
+    const amount = fare && fare.amount
 
-        if (amount) {
-          emit(date.dateOut, {prices: [{faresLeft: faresLeft, amount: amount, serverTimeUTC: serverTimeUTC}]})
-        }
-    });
+    if (amount) {
+      emit(date.dateOut, {prices: [{faresLeft: faresLeft, amount: amount, serverTimeUTC: serverTimeUTC}]})
+    }
+  });
 };
 
 function reducer(key, values) {
