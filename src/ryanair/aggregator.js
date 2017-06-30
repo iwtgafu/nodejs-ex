@@ -3,28 +3,36 @@ import assert from 'assert'
 
 
 function mapper () { 
-  if (!this.trips || this.trips.length < 1) return;
-  const dates = this.trips[0].dates
-  const serverTimeUTC = this.serverTimeUTC
+  if (this.trips && this.trips.length > 0) {
+    const dates = this.trips[0] && this.trips[0].dates
 
-  dates.forEach(function(date) {
-    const flight = date && date.flights && date.flights.length > 0 && date.flights[0];
-    const faresLeft = flight && flight.faresLeft;
-    const fare = flight && flight.regularFare && flight.regularFare.fares && flight.regularFare.fares.length > 0 && flight.regularFare.fares[0];
-    const amount = fare && fare.amount
+    dates && dates.forEach(function(date) {
+      const flight = date && date.flights && date.flights.length > 0 && date.flights[0];
+      const fare = flight && flight.regularFare && flight.regularFare.fares && flight.regularFare.fares.length > 0 && flight.regularFare.fares[0];
+      const amount = fare && fare.amount
 
-    if (amount) {
-      emit(date.dateOut, {prices: [{faresLeft: faresLeft, amount: amount, serverTimeUTC: serverTimeUTC}]})
-    }
-  });
+      if (amount) {
+        emit(date.dateOut, {
+          prices: [{
+            faresLeft: flight && flight.faresLeft,
+            amount: amount,
+            serverTimeUTC: this.serverTimeUTC,
+          }]
+        })
+      }
+    });
+  }
 };
 
 function reducer(key, values) {
   var result = values.reduce(function (result, value) {
-    const nextPriceList = result[result.length - 1];
-    const lastPriceList = value.prices[value.prices.length - 1]
+    const nextPriceList = result[result.length > 0 && result.length - 1];
+    const lastPriceList = value.prices && value.prices[value.prices.length > 0 && value.prices.length - 1];
     
-    if (result.length === 0 || nextPriceList.amount !== lastPriceList.amount || nextPriceList.faresLeft !== lastPriceList.faresLeft) {
+    if (result.length === 0 ||
+      nextPriceList.amount !== lastPriceList.amount ||
+      nextPriceList.faresLeft !== lastPriceList.faresLeft) {
+
       return result.concat(value.prices)
     }
     return result;

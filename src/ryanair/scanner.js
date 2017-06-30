@@ -42,6 +42,8 @@ function savePriceList(resp) {
   getConnection((err, db) => {
     assert.equal(null, err);
     db.collection('ryanairPriceLists').insert(resp);
+    const count = resp && resp.trips && resp.trips.length > 0 && resp.trips[0] && resp.trips[0].dates && resp.trips[0].dates.length;
+    console.log('saved', JSON.stringify(count), 'dates')
     db.close();
   });
 }
