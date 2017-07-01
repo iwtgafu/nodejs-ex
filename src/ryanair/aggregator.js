@@ -5,6 +5,7 @@ import assert from 'assert'
 function mapper () { 
   if (this.trips && this.trips.length > 0) {
     const dates = this.trips[0] && this.trips[0].dates
+    const serverTimeUTC =  this.serverTimeUTC;
 
     dates && dates.forEach(function(date) {
       const flight = date && date.flights && date.flights.length > 0 && date.flights[0];
@@ -16,7 +17,7 @@ function mapper () {
           prices: [{
             faresLeft: flight && flight.faresLeft,
             amount: amount,
-            serverTimeUTC: this.serverTimeUTC,
+            serverTimeUTC: serverTimeUTC,
           }]
         })
       }
